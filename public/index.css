@@ -410,6 +410,7 @@ body,
   }
 
   .spinner-border {
+     background: black;
      width: 5rem !important;
      height: 5rem !important;
      box-shadow: 0 0 1px #22cef9, 0 0 1px #22cef9, 0 0 61px #22cef9, 0 0 112px #22cef9;
