@@ -1,21 +1,19 @@
 import React from "react";
-import { CharacterProperties } from "../models/models";
+import { CharacterParams, CharacterObject } from "../models/models";
 import { v4 as uuidv4 } from "uuid";
 
 interface PaginationProps {
-  // pageCount: CharacterProperties["itemsPerPage"];
-  // currentPage: CharacterProperties["currentPage"];
-  onNextRequest: () => void;
-  onPreviousRequest: () => void;
+  pageCount: CharacterObject["count"];
+  currentPage: CharacterParams["currentPage"];
+  onNextOrPreviousRequest: (direction: string) => void;
   onSpecificNumberClick: (page: number) => void;
 }
 export function Pagination({
-  // pageCount,
-  onNextRequest,
-  onPreviousRequest,
+  pageCount,
+  onNextOrPreviousRequest,
   onSpecificNumberClick,
-}: // currentPage,
-PaginationProps) {
+  currentPage,
+}: PaginationProps) {
   function getPaginationLinks(currentPage: number, lastPage: number) {
     const array = [
       1,
@@ -35,12 +33,16 @@ PaginationProps) {
       className={"navigation d-flex justify-content-center align-self-center"}
       aria-label="Page navigation example"
     >
-      <ul className="pagination pagination-lg flex-wrap d-flex justify-content-center align-items-center m-0">
+      <ul className="pagination pagination-lg flex-wrap d-flex justify-content-center align-items-end m-0">
         <li
           key={uuidv4()}
-          onClick={() => {
-            onPreviousRequest();
-          }}
+          onClick={
+            currentPage > 1
+              ? () => {
+                  onNextOrPreviousRequest("previous");
+                }
+              : () => {}
+          }
           className="page-item"
         >
           <p
@@ -51,7 +53,7 @@ PaginationProps) {
             <span className="sr-only">Previous</span>
           </p>
         </li>
-        {getPaginationLinks(1, 10).map((pageNumber) => {
+        {getPaginationLinks(currentPage, pageCount).map((pageNumber) => {
           if (pageNumber === "previous" || pageNumber === "next") {
             return (
               <li key={uuidv4()} className={`page-item disabled inactive`}>
@@ -65,11 +67,13 @@ PaginationProps) {
                 onClick={() => {
                   onSpecificNumberClick(Number(pageNumber));
                 }}
-                className={`page-item  ${Number(pageNumber) === 1 && "active"}`}
+                className={`page-item  ${
+                  Number(pageNumber) === currentPage && "active"
+                }`}
               >
                 <p
                   className={`page-link d-flex justify-content-center ${
-                    Number(pageNumber) === 1 && "active"
+                    Number(pageNumber) === currentPage && "active"
                   } `}
                 >
                   {Number(pageNumber)}
@@ -79,9 +83,13 @@ PaginationProps) {
           }
         })}
         <li
-          onClick={() => {
-            onNextRequest();
-          }}
+          onClick={
+            currentPage !== pageCount
+              ? () => {
+                  onNextOrPreviousRequest("next");
+                }
+              : () => {}
+          }
           className="page-item"
         >
           <p

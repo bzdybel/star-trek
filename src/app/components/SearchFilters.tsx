@@ -1,26 +1,54 @@
-import React from "react";
-import { CharacterParams } from "../models/models";
-interface SearchFiltersProps {
-  onSetSkinColor: (skinColor: string) => void;
-  onSelectGender: (gender: string) => void;
-  gender: CharacterParams["gender"];
-  skinColor: CharacterParams["skinColor"];
-}
+import React, { useEffect, useState } from "react";
 
-export function SearchFilters({
-  onSetSkinColor,
-  onSelectGender,
-  gender,
-  skinColor,
-}: SearchFiltersProps) {
+import { PlanetObject, PlanetModel } from "../models/models";
+import { useQuery } from "react-query";
+import { fetchPlanets } from "../../api/api";
+import { v4 as uuidv4 } from "uuid";
+
+interface SearchFiltersProps {
+  onSetPlanet: (planet: PlanetModel) => void;
+}
+export function SearchFilters({ onSetPlanet }: SearchFiltersProps) {
+  const [planets, setPlanets] = useState<PlanetObject["results"]>([]);
+  const [nextPlanet, setNextPlanet] = useState<PlanetObject["next"]>("");
+
+  const planetsRequestState = useQuery<PlanetObject>({
+    queryKey: [],
+    queryFn: fetchPlanets,
+    config: {
+      onError: () => console.log("Error"),
+    },
+  });
+
+  const planetsData = planetsRequestState?.data as PlanetObject;
+  useEffect(() => {
+    const newPlanets = planetsData?.results;
+    if (newPlanets) {
+      setPlanets((planets) => [...planets, ...newPlanets]);
+    }
+    if (planetsData?.next) {
+      setNextPlanet(planetsData?.next);
+    }
+  }, [planetsData, nextPlanet]);
+
+  const onPlanetChange = (value: string) => {
+    const selectedPlanetObject = planets.find(
+      (planet) => planet.name === value
+    ) as PlanetModel;
+    onSetPlanet(selectedPlanetObject);
+  };
   return (
-    <div className="col-6 form-check checkboxes-wrapper  d-flex  justify-content-between ">
-      <div className="min-width custom-control custom-checkbox checkbox-xl w-50">
-        here will be filter
-      </div>
-      <div className="min-width custom-control custom-checkbox checkbox-xl w-50">
-        here will be filter
-      </div>
+    <div className="checkboxes-wrapper  d-flex  justify-content-between align-items-start ">
+      <select
+        onChange={(item) => onPlanetChange(item.target.value)}
+        className="form-control form-control-lg filter"
+      >
+        {planets.map((planet) => (
+          <option key={uuidv4()} className="filter-option">
+            {planet.name}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

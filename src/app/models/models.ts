@@ -1,9 +1,16 @@
 export type CharacterParams = {
   currentPage: number;
   gender: string;
-  skinColor: string;
+  planet: string;
   searchValue: string;
+  id: string;
+  species: string;
 };
+export type Params ={
+  params: {
+    id: string
+  }
+}
 
 export type characterObject = {
   items: Array<{
@@ -42,7 +49,10 @@ export type CharacterProperties = {
   url: string;
 };
 export type CharacterObject = {
-  items: Array<{
+  count: number,
+  next: string | null,
+  previous: string | null, 
+  results: Array<{
     name: string;
     height: string;
     mass: string;
@@ -63,6 +73,62 @@ export type CharacterObject = {
 };
 export type CharacterSearchPayload = {
   searchValue: string;
-  gender: string;
-  skin_color: string;
+  direction: string | null
 };
+
+export type CharacterSearchPayloadNextPrevious ={
+  next: string,
+  previous: string,
+  direction: string
+}
+export type PlanetObject={
+  next: null | string
+  results: Array<{
+			name: string
+			rotation_period: string
+			orbital_period: string
+			diameter: string
+			climate: string
+			gravity: string
+			terrain: string
+			surface_water:string
+			population: string
+			residents:  Array<string>
+			films: Array<string>
+			created: string
+			edited: string
+			url: string
+  }>
+}
+
+export type PlanetModel={
+  name: string
+  rotation_period: string
+  orbital_period: string
+  diameter: string
+  climate: string
+  gravity: string
+  terrain: string
+  surface_water:string
+  population: string
+  residents:  Array<string>
+  films: Array<string>
+  created: string
+  edited: string
+  url: string
+}
+
+export type UsersModel ={ 
+  users: Array<{
+    login: string,
+    password: string
+  }>
+}
+
+export type UserModel = {
+  user:{
+    login: string,
+    password: string
+    token: string
+  }
+}

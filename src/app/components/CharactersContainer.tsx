@@ -6,16 +6,19 @@ import { EmptyPage } from "../components/EmptyPage";
 import { v4 as uuidv4 } from "uuid";
 
 interface CharactersContainerProps {
-  listItems: CharacterObject["items"];
+  listItems: CharacterObject["results"];
 }
 export function CharactersContainer({ listItems }: CharactersContainerProps) {
   return (
-    <div className="h-100">
+    <div className="main " style={{ background: "unset" }}>
       {listItems?.length === 0 ? (
         <EmptyPage />
       ) : (
-        <div key={uuidv4()} className="container-fluid characters-container">
-          {listItems?.map((item) => {
+        <div
+          key={uuidv4()}
+          className="container-fluid characters-container main-container-wrapper h-100"
+        >
+          {listItems?.map((item, index) => {
             return (
               <SpecificCharacter
                 item={{

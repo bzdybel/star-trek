@@ -12,12 +12,12 @@ export function SearchBar({ onSearch, searchValue }: SearchBarProps) {
   >(searchValue);
 
   return (
-    <div className="col-8 search-bar-wrapper  d-flex justify-content-center align-self-center">
-      <div className=" input-group">
+    <div className=" d-flex justify-content-center align-self-start w-100">
+      <div className="input-group">
         <input
           data-cy="search"
           type="text"
-          className="border-right-0 form-control p-4 h-100"
+          className="border-right-0 form-control  h-100 search-bar"
           placeholder="Search"
           aria-describedby="basic-addon2"
           value={temporarySearchValue}

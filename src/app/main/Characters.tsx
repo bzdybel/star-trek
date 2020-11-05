@@ -1,84 +1,100 @@
 import React, { useState } from "react";
 import { Header } from "../components/Header";
-import { CharacterParams, CharacterObject } from "../models/models";
+import {
+  CharacterParams,
+  CharacterObject,
+  CharacterSearchPayload,
+  PlanetModel,
+} from "../models/models";
 import { useQuery } from "react-query";
 import { fetchGetCharacters } from "../../api/api";
 import { CharactersContainer } from "../components/CharactersContainer";
 import { Pagination } from "../components/Pagination";
+import { getIdFromUrl } from "../utils/utils";
 
 export const Characters = () => {
   const [currentPage, setCurrentPage] = useState<
     CharacterParams["currentPage"]
   >(1);
-  const [skinColor, setSkinColor] = useState<CharacterParams["skinColor"] | "">(
-    ""
-  );
-  const [gender, setGender] = useState<CharacterParams["gender"] | "">("");
+  const [planet, setPlanet] = useState<PlanetModel>();
   const [searchValue, setSearchValue] = useState<
     CharacterParams["searchValue"]
   >("");
+  const [direction, setDirection] = useState<
+    CharacterSearchPayload["direction"]
+  >("");
 
   const charactersRequestState = useQuery<CharacterObject, CharacterParams>({
-    queryKey: [{ currentPage, skinColor, gender, searchValue }],
+    queryKey: [{ currentPage, searchValue, direction }],
     queryFn: fetchGetCharacters,
     config: {
       onError: () => console.log("Error"),
     },
   });
-  const characters = charactersRequestState?.data as CharacterObject;
-  const onNextRequest = () => {
-    // currentPage < characters.pageCount
-    //   ? setCurrentPage(currentPage + 1)
-    //   : setCurrentPage(characters.pageCount);
-  };
-  const onPreviousRequest = () => {
-    currentPage > 1 ? setCurrentPage(currentPage - 1) : setCurrentPage(1);
+  let characters = charactersRequestState?.data as CharacterObject;
+
+  const onNextOrPreviousRequest = (direction: string) => {
+    if (
+      direction === "next" &&
+      currentPage < Math.ceil(characters?.count / 10)
+    ) {
+      setDirection(characters.next);
+      setCurrentPage(currentPage + 1);
+    } else if (currentPage > 1) {
+      setDirection(characters.previous);
+      setCurrentPage(currentPage - 1);
+    }
   };
   const onSpecificNumberClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
-  const onSetSkinColor = (skinColor: string): void => {
-    skinColor !== null && setSkinColor(skinColor);
-  };
-  const onSelectGender = (gender: string): void => {
-    gender !== null && setGender(gender);
+
+  const onSetPlanet = (planet: PlanetModel): void => {
+    setPlanet(planet);
   };
   const onSearch = (searchValue: string): void => {
+    setCurrentPage(1);
     setSearchValue(searchValue);
   };
   return (
     <>
-      {/* {charactersRequestState.isLoading ? (
+      {charactersRequestState.isLoading ? (
         <div className="d-flex h-100 w-100 align-items-center justify-content-center">
           <div className="spinner-border" role="status">
             <span className="sr-only">Loading...</span>
           </div>
         </div>
-      ) : ( */}
-      <div className="h-100">
-        <Header
-          filters={{
-            searchValue,
-            gender,
-            skinColor,
-          }}
-          onSetSkinColor={onSetSkinColor}
-          onSelectGender={onSelectGender}
-          onSearch={onSearch}
-          setSearchValue={setSearchValue}
-        />
-        <CharactersContainer listItems={characters?.items} />
-        {/* {characters?.totalItems > 0 && (
-          <Pagination
-            pageCount={characters?.pageCount}
-            onNextRequest={onNextRequest}
-            onPreviousRequest={onPreviousRequest}
-            onSpecificNumberClick={onSpecificNumberClick}
-            currentPage={currentPage}
+      ) : (
+        <div className="main">
+          <Header
+            filters={{
+              searchValue,
+            }}
+            onSetPlanet={onSetPlanet}
+            onSearch={onSearch}
+            setSearchValue={setSearchValue}
           />
-        )} */}
-      </div>
-      {/* )}   */}
+          <CharactersContainer
+            listItems={
+              planet
+                ? characters?.results.filter(
+                    (character) =>
+                      getIdFromUrl(character.homeworld) ===
+                      getIdFromUrl(planet?.url)
+                  )
+                : characters?.results
+            }
+          />
+          {characters?.count > 0 && (
+            <Pagination
+              pageCount={Math.ceil(characters?.count / 10)}
+              onNextOrPreviousRequest={onNextOrPreviousRequest}
+              onSpecificNumberClick={onSpecificNumberClick}
+              currentPage={currentPage}
+            />
+          )}
+        </div>
+      )}
     </>
   );
 };
